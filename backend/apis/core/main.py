@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.core.db import connectToDatabase, disconnectFromDatabase
 from contextlib import asynccontextmanager
+from app.endpoints import auth
 
 @asynccontextmanager
 async def lifespan(app : FastAPI):
@@ -8,7 +9,7 @@ async def lifespan(app : FastAPI):
     yield 
     await disconnectFromDatabase()
 
-
 app = FastAPI(lifespan=lifespan)
 
-app.include_router()
+#Endpoints
+app.include_router(auth.router)
