@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
 from app.core.config import settings
 import jwt
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.modules.auth.repository import AuthRepository
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+security = HTTPBearer()
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
@@ -40,7 +42,9 @@ class AuthService:
         
         try:
             await AuthRepository.insert_user(email, password, first_name, last_name)
-            token = create_access_token({"email" : email}, timedelta(days=2))
+            token = create_access_token(
+                {"email" : email, "first_name" : first_name, "last_name" : last_name},
+                                         timedelta(days=2))
             return {"message" : "User succesfully registered", "access_token" : token}
         except Exception:
             raise HTTPException(500, "There was a problem at the registration process")
@@ -51,11 +55,22 @@ class AuthService:
         if not result:
             raise HTTPException(400, "There does not exist an account with this email adress")
 
-        hashed_password = await AuthRepository.retrieve_hashed_password(email)
+        hashed_password = result["password"]
         try:
             if verify_password(password, hashed_password):
-                token = create_access_token({"email" : email}, timedelta(days = 2))
+                token = create_access_token(
+                    { "email" : email, "first_name" : result["first_name"], "last_name" : result["last_name"]},
+                    timedelta(days = 2))
                 return {"message" : "User succesfully logged in", "acces_token" : token}
         except Exception:
             raise HTTPException(500, "There was a problem in the logging process")    
         raise HTTPException(400, "Invalid password!")
+
+    @staticmethod
+    async def get_current_user(credentials : HTTPAuthorizationCredentials = Depends(security)):
+        token = credentials.credentials
+        try:
+            user_info = decode_token(token)
+            return user_info
+        except Exception:
+            raise HTTPException(401, "Invalid token!")

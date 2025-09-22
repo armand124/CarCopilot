@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from app.modules.auth.model import UserRegistrationRequest, UserLoginRequest
 from app.modules.auth.service import AuthService
 
@@ -17,3 +17,9 @@ async def register_user(user : UserRegistrationRequest):
 )
 async def login_user(user : UserLoginRequest):
     return await AuthService.login_user(user.email, user.password)
+
+@router.get(
+    "/profile"
+)
+async def profile(current_user : dict = Depends(AuthService.get_current_user)):
+    return {"email" : current_user["email"]}

@@ -17,9 +17,3 @@ class AuthRepository:
             "last_name" : last_name
         })
         return result.inserted_id
-
-    @staticmethod
-    async def retrieve_hashed_password(email : str):
-        col = Database.db[settings.DB_USER_COLLECTION]
-        result = await col.find_one({"email" : email})
-        return result["password"]
