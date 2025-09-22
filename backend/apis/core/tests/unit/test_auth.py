@@ -1,9 +1,12 @@
 from app.modules.auth.service import create_access_token,decode_token
+from app.modules.auth.repository import AuthRepository
 from datetime import timedelta
-import pytest
+import pytest,asyncio
 from app.core.db import connectToDatabase
 
-@staticmethod
+pytest_plugins = ('pytest_asyncio',)
+
+@pytest.mark.asyncio
 async def test_token():
    await connectToDatabase()
    info = {
@@ -15,7 +18,7 @@ async def test_token():
    decoded_info.pop("exp",None)
    assert (cod is not None) and (decoded_info == info)
 
-@staticmethod
+@pytest.mark.asyncio
 async def test_expired_token():
    await connectToDatabase()
    secret = "John Doe"
@@ -29,4 +32,3 @@ async def test_expired_token():
    
    with pytest.raises(ExpiredSignatureError):
       decode_token(cod)
-  

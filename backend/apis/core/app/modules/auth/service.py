@@ -45,3 +45,17 @@ class AuthService:
         except Exception:
             raise HTTPException(500, "There was a problem at the registration process")
 
+    @staticmethod
+    async def login_user(email : str, password : str):
+        result = await AuthRepository.search_user_by_email(email)
+        if not result:
+            raise HTTPException(400, "There does not exist an account with this email adress")
+
+        hashed_password = await AuthRepository.retrieve_hashed_password(email)
+        try:
+            if verify_password(password, hashed_password):
+                token = create_access_token({"email" : email}, timedelta(days = 2))
+                return {"message" : "User succesfully logged in", "acces_token" : token}
+        except Exception:
+            raise HTTPException(500, "There was a problem in the logging process")    
+        raise HTTPException(400, "Invalid password!")

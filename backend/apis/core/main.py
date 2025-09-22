@@ -1,13 +1,13 @@
 from fastapi import FastAPI
-from app.core.db import connectToDatabase, disconnectFromDatabase
+from app.core.db import Database
 from contextlib import asynccontextmanager
 from app.endpoints import auth
 
 @asynccontextmanager
 async def lifespan(app : FastAPI):
-    await connectToDatabase()
+    await Database.connectToDatabase()
     yield 
-    await disconnectFromDatabase()
+    await Database.disconnectFromDatabase()
 
 app = FastAPI(lifespan=lifespan)
 
