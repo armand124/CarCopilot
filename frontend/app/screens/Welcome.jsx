@@ -1,9 +1,12 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { Button, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import "../../global.css";
 import Hero from '../imgs/welcome_img.svg';
 const WelcomeScreen = () => {
+    const router = useRouter();
+
     return (
         <SafeAreaView className='bg-white'>
             <ScrollView className='bg-white'>
@@ -17,7 +20,7 @@ const WelcomeScreen = () => {
                 <Button 
                     title='Get Started' 
                     color='#fffff'
-                    onPress={() => {}}/>
+                    onPress={() => { router.push("/screens/AuthOptions")}}/>
             </ScrollView>
         </SafeAreaView>
     )
